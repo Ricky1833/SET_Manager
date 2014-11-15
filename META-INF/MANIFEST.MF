@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SET
+Bundle-SymbolicName: org.sdsu.cs532.SET; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.sdsu.cs532.set.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.sdsu.cs532.mysql;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.eclipse.ui.forms.widgets
+Bundle-ClassPath: .
