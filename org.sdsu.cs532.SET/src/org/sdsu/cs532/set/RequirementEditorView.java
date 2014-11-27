@@ -13,6 +13,7 @@ import java.sql.*;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -24,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -33,6 +35,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.sdsu.cs532.jdbc.JDBCMySQLDemo;
 import org.sdsu.cs532.jdbc.JDBCMySQLNavMenu;
+import org.sdsu.cs532.jdbc.JDBCMySQLSetCombos;
 
 public class RequirementEditorView extends ViewPart {
 
@@ -93,10 +96,14 @@ public class RequirementEditorView extends ViewPart {
 	private Image calendarImage;
 	private Requirement req;
 	private Button testButton;
+	private List<String> funcList;
+	private List<String> allList;
+	private List<String> statList;
 	
 	public void createPartControl(Composite parent) {
 		createTopLevelComponents(parent);
 		setTopLevelLayouts();
+		setComboLists();
 		createComponents(parent);
 		setListeners(parent);
 		setLayouts();
@@ -251,22 +258,24 @@ public class RequirementEditorView extends ViewPart {
 		this.functionalAreaLabel.setText("Functional Area");
 		//functional areas, need to populate with what areas are deemed needed, untill rbac is deployed.
 		this.functionalAreaCombo = new Combo(this.functionalComposite, SWT.READ_ONLY);
-		String[] areas = {"", "General", "Defects", "Reqs", "Collab"};
+		String[] areas = new String[this.funcList.size()];
+		this.funcList.toArray(areas);
 		this.functionalAreaCombo.setItems(areas);
 		
 		this.allocationLabel = new Label(this.functionalComposite, SWT.NONE);
 		this.allocationLabel.setText("Allocation");
 		
 		this.allocationCombo = new Combo(this.functionalComposite, SWT.READ_ONLY);
-		String[] allo = {"", "Hardware", "System Software", "Application Software" ,
-				"User Process", "Other"};
+		String[] allo = new String[this.allList.size()];
+		this.allList.toArray(allo);
 		this.allocationCombo.setItems(allo);
 		
 		this.statusLabel = new Label(this.functionalComposite, SWT.NONE);
 		this.statusLabel.setText("Status");
 		
 		this.statusCombo = new Combo(this.functionalComposite, SWT.READ_ONLY);
-		String[] stats = {"", "Open", "Accepted", "Rejected", "Needs Modification", "Not Testable", "Tested", "Implemented", "Deleted"};
+		String[] stats = new String[this.statList.size()];
+		this.statList.toArray(stats);
 		this.statusCombo.setItems(stats);
 		
 		this.componentsLabel = new Label(this.functionalComposite, SWT.NONE);
@@ -306,6 +315,13 @@ public class RequirementEditorView extends ViewPart {
 		this.testsSection.setExpanded(true);
 		this.dateComposite.layout(true, true);
 		this.viewForm.layout(true, true);
+	}
+	
+	private void setComboLists() {
+		JDBCMySQLSetCombos setCombos = new JDBCMySQLSetCombos();
+		this.allList = setCombos.getAllocationList();
+		this.funcList = setCombos.getFunctionalList();
+		this.statList = setCombos.getStatusList();
 	}
 	
 	private void setLayouts() {
@@ -473,9 +489,10 @@ public class RequirementEditorView extends ViewPart {
 		
 		this.saveButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				try {
 				req = new Requirement(RequirementEditorView.this.nameText.getText(),
 						RequirementEditorView.this.reqIDText.getText(),
-						RequirementEditorView.this.functionalAreaCombo.getItem(RequirementEditorView.this.functionalAreaCombo.getSelectionIndex()),
+						Integer.toString(RequirementEditorView.this.functionalAreaCombo.getSelectionIndex()),//.getItem(RequirementEditorView.this.functionalAreaCombo.getSelectionIndex()),
 						RequirementEditorView.this.dateEnteredText.getText(),
 						RequirementEditorView.this.dateBasedlinedText.getText(),
 						RequirementEditorView.this.allocationCombo.getItem(RequirementEditorView.this.allocationCombo.getSelectionIndex()),
@@ -484,7 +501,10 @@ public class RequirementEditorView extends ViewPart {
 						RequirementEditorView.this.reqSourceText.getText(),
 						RequirementEditorView.this.moduleText.getText(),
 						RequirementEditorView.this.testsText.getText());
-//				System.out.println(req.getAllocation());
+				} catch (IllegalArgumentException exception) {
+					MessageDialog.openError(Display.getDefault().getActiveShell(),"Invalid Selection",exception.toString()+
+							"\nPlease verify Functional Data selections are not blank.");
+				}
 			}
 		});
 		
@@ -492,6 +512,7 @@ public class RequirementEditorView extends ViewPart {
 			public void widgetSelected(SelectionEvent e) {
 				RequirementEditorView.this.nameText.setText("");
 				RequirementEditorView.this.reqIDText.setText("");
+				RequirementEditorView.this.descText.setText("");
 				RequirementEditorView.this.functionalAreaCombo.select(0);
 				RequirementEditorView.this.dateEnteredText.setText("");
 				RequirementEditorView.this.dateBasedlinedText.setText("");

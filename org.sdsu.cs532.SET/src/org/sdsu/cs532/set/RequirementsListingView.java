@@ -48,7 +48,6 @@ public class RequirementsListingView extends ViewPart {
 		JDBCMySQLRequirementListing listing = new JDBCMySQLRequirementListing();
 		listing.assembleRequirements();
 		this.requirementsList = listing.getListOfRequirements();
-//		System.out.println(this.requirementsList.toString());
 	}
 	
 	public void createTopLevelComponents(Composite parent) {
@@ -58,9 +57,7 @@ public class RequirementsListingView extends ViewPart {
 		this.formBody = this.viewForm.getBody();
 		
 		this.mainComposite = new Composite(this.formBody, SWT.NONE);
-		
 		this.tableComposite = new Composite(this.mainComposite, SWT.BORDER);
-		
 		this.buttonComposite = new Composite(this.mainComposite, SWT.BORDER);
 	}
 	
